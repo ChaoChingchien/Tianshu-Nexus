@@ -1,0 +1,24 @@
+{
+  "name": "tianshu-nexus",
+  "version": "0.1.0",
+  "private": true,
+  "description": "天枢·AI临床决策管理系统",
+  "scripts": {
+    "dev": "pnpm --parallel -r run dev",
+    "build": "pnpm -r run build",
+    "lint": "pnpm -r run lint",
+    "test": "pnpm -r run test",
+    "setup": "pnpm install && pnpm --filter @tianshu/shared run build",
+    "db:generate": "pnpm --filter @tianshu/server run prisma:generate",
+    "db:push": "pnpm --filter @tianshu/server run prisma:push",
+    "db:migrate": "pnpm --filter @tianshu/server run prisma:migrate",
+    "db:seed": "pnpm --filter @tianshu/server run prisma:seed",
+    "db:studio": "pnpm --filter @tianshu/server run prisma:studio",
+    "start:server": "pnpm --filter @tianshu/server run dev",
+    "start:web": "pnpm --filter @tianshu/web run dev"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}

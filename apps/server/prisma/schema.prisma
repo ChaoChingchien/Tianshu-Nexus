@@ -1,0 +1,596 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== ENUMS ====================
+
+enum Role {
+  ADMIN
+  DOCTOR
+  NURSE
+  PATIENT
+}
+
+enum DrugCategory {
+  PSYCHOTROPIC
+  WESTERN
+  CHINESE_PATENT
+}
+
+enum TreatmentCategoryType {
+  ACUPUNCTURE
+  TUINA
+  MOXIBUSTION
+  CUPPING
+  SCRAPING
+  PHYSIOTHERAPY
+  PSYCHOLOGICAL_COUNSELING
+  PSYCHOTHERAPY
+  MEDICATION
+  SURGERY
+  REHABILITATION
+}
+
+enum TCMTreatmentCategoryType {
+  MOXIBUSTION
+  CUPPING
+  SCRAPING
+  EAR_ACUPOINT
+  ACUPUNCTURE
+  TUINA
+}
+
+enum AppointmentStatus {
+  CONFIRMED
+  CHECKED_IN
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum FollowUpType {
+  ONLINE
+  OUTPATIENT
+  PHONE
+}
+
+enum FollowUpStatus {
+  PENDING
+  COMPLETED
+  MISSED
+}
+
+enum ArticleStatus {
+  DRAFT
+  PENDING_REVIEW
+  PUBLISHED
+  REJECTED
+}
+
+enum LeaveType {
+  LEAVE
+  OUTING
+}
+
+enum LeaveStatus {
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+}
+
+enum TreatmentPlanStatus {
+  DRAFT
+  IN_PROGRESS
+  COMPLETED
+  STOPPED
+}
+
+enum PatientCategory {
+  INPATIENT
+  OUTPATIENT
+  CHARITY
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+// ==================== CORE ENTITIES ====================
+
+model User {
+  id              String    @id @default(cuid())
+  username        String    @unique
+  email           String?
+  passwordHash    String
+  displayName     String
+  role            Role
+  isActive        Boolean   @default(true)
+  totpSecret      String?
+  totpEnabled     Boolean   @default(false)
+  department      String?
+  hospital        String?
+  phone           String?
+  avatarUrl       String?
+  isFirstLogin    Boolean   @default(true)
+  permissions     String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  // Relations
+  doctorProfile          DoctorProfile?
+  patientProfile         PatientProfile?
+  createdPatients        Patient[]           @relation("CreatedByDoctor")
+  primaryPatients        Patient[]           @relation("PrimaryDoctor")
+  doctorSchedules        DoctorSchedule[]
+  doctorAppointments     Appointment[]       @relation("DoctorAppointments")
+  followUps              FollowUp[]
+  dispensingRecords      DispensingRecord[]  @relation("DispensingNurse")
+  educationArticles      EducationArticle[]  @relation("ArticleCreator")
+  approvedLeaves         LeaveRequest[]      @relation("ApprovingDoctor")
+  auditLogs              AuditLog[]
+}
+
+model DoctorProfile {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  department       String?
+  hospital         String?
+  specialties      String?
+  aiStyleFeatures  String?
+  practiceProfile  String?
+  totalCases       Int      @default(0)
+  successCases     Int      @default(0)
+  treatmentStats   String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model PatientProfile {
+  id                              String   @id @default(cuid())
+  userId                          String   @unique
+  invitationCode                  String?
+  privacyAnonymizeDisplay         Boolean  @default(true)
+  privacyDataSharingLevel         String?
+  privacyNotificationPreference   String?
+  privacyResearchConsent          Boolean  @default(false)
+  aiDiagnosisEnabled              Boolean  @default(true)
+  aiRecommendationEnabled         Boolean  @default(true)
+  aiMedicationReminder            Boolean  @default(false)
+  aiHealthAlertEnabled            Boolean  @default(true)
+  aiFollowUpReminder              Boolean  @default(true)
+  aiTreatmentOptimization         Boolean  @default(false)
+  createdAt                       DateTime @default(now())
+  updatedAt                       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model InvitationCode {
+  id         String   @id @default(cuid())
+  code       String   @unique
+  isUsed     Boolean  @default(false)
+  usedBy     String?
+  createdAt  DateTime @default(now())
+  usedAt     DateTime?
+}
+
+model Patient {
+  id              String         @id @default(cuid())
+  anonymousId     String         @unique
+  name            String
+  gender          String?
+  age             Int?
+  phone           String?
+  address         String?
+  idNumber        String?
+  diagnosis       String?
+  admissionDate   DateTime?
+  bedNumber       String?
+  department      String?
+  primaryDoctorId String?
+  createdById     String?
+  notes           String?
+  category        PatientCategory @default(INPATIENT)
+  isArchived      Boolean         @default(false)
+  riskLevel       RiskLevel?
+  riskWarning     String?
+  patientFeatures String?
+  patientProfile  String?
+  implicitPreferences String?
+  riskAssessment String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  primaryDoctor    User?             @relation("PrimaryDoctor", fields: [primaryDoctorId], references: [id])
+  createdBy        User?             @relation("CreatedByDoctor", fields: [createdById], references: [id])
+  healthRecord     HealthRecord?
+  medicationOrders MedicationOrder[]
+  dispensingRecords DispensingRecord[]
+  treatmentPlans   TreatmentPlan[]
+  appointments      Appointment[]
+  groupMembers      PatientGroupMember[]
+  followUps        FollowUp[]
+  leaveRequests    LeaveRequest[]
+}
+
+model MedicalRecord {
+  id                    String   @id @default(cuid())
+  patientId             String
+  diagnosis             String?
+  symptoms              String?
+  medicalHistory        String?
+  treatmentPlan         String?
+  doctorStyleFeatures   String?
+  htePredictionResult   String?
+  counterFactualComparison String?
+  followUpArrangement   String?
+  riskMarkers           String?
+  patientFeedback       String?
+  treatmentOutcome      String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  treatmentPlans TreatmentPlan[]
+  followUps      FollowUp[]
+}
+
+// ==================== BUSINESS ENTITIES ====================
+
+model Drug {
+  id              String       @id @default(cuid())
+  name            String
+  genericName     String?
+  category        DrugCategory @default(WESTERN)
+  specification   String?
+  unit            String?
+  defaultDosage   String?
+  usage           String?
+  price           Float?
+  manufacturer    String?
+  description     String?
+  totalStock      Int          @default(0)
+  minStockWarning Int          @default(10)
+  isActive        Boolean      @default(true)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  medicationOrders  MedicationOrder[]
+  dispensingRecords DispensingRecord[]
+}
+
+model MedicationOrder {
+  id          String   @id @default(cuid())
+  patientId   String
+  drugId      String
+  dailyDosage String?
+  usage       String?
+  status      String   @default("ACTIVE")
+  prescribedById String?
+  startDate   DateTime?
+  endDate     DateTime?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  patient Patient @relation(fields: [patientId], references: [id])
+  drug    Drug    @relation(fields: [drugId], references: [id])
+}
+
+model DispensingRecord {
+  id                String   @id @default(cuid())
+  patientId         String
+  drugId            String
+  drugName          String
+  specification     String?
+  dailyDosage       String?
+  quantity          Int
+  remainingQuantity Int
+  dispensingDate    DateTime @default(now())
+  expectedNextDate  DateTime?
+  dispensedById     String
+  status            String   @default("DISPENSED")
+  undispenseReason  String?
+  notes             String?
+  signature         String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  patient    Patient @relation(fields: [patientId], references: [id])
+  drug       Drug    @relation(fields: [drugId], references: [id])
+  dispensedBy User   @relation("DispensingNurse", fields: [dispensedById], references: [id])
+}
+
+model TreatmentItem {
+  id                String                @id @default(cuid())
+  name              String
+  code              String?
+  category          TreatmentCategoryType
+  standardDuration  Int?
+  standardFrequency String?
+  price             Float?
+  description       String?
+  requiredEquipment String?
+  cancelLeadTime    Int?
+  isActive          Boolean               @default(true)
+  customTags        String?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  appointments Appointment[]
+}
+
+model DoctorSchedule {
+  id          String   @id @default(cuid())
+  doctorId    String
+  dayOfWeek   Int
+  startTime   String
+  endTime     String
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  doctor User @relation(fields: [doctorId], references: [id])
+}
+
+model Appointment {
+  id                 String            @id @default(cuid())
+  patientId          String
+  doctorId           String
+  treatmentItemId    String?
+  appointmentDate    DateTime
+  startTime          String
+  endTime            String
+  status             AppointmentStatus @default(CONFIRMED)
+  cancellationReason String?
+  isCharged          Boolean           @default(false)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  patient       Patient       @relation(fields: [patientId], references: [id])
+  doctor        User          @relation("DoctorAppointments", fields: [doctorId], references: [id])
+  treatmentItem TreatmentItem? @relation(fields: [treatmentItemId], references: [id])
+}
+
+model TreatmentPlan {
+  id                     String              @id @default(cuid())
+  patientId              String
+  medicalRecordId        String?
+  name                   String
+  syndromeDiagnosis      String?
+  treatmentPrinciple     String?
+  acupointPrescription   String?
+  tcmTreatments          String?
+  medicationPrescription String?
+  otherTreatments        String?
+  courseCount            Int?
+  treatmentFrequency     String?
+  startDate              DateTime?
+  endDate                DateTime?
+  status                 TreatmentPlanStatus @default(DRAFT)
+  efficacyScore          Int?
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+
+  patient      Patient?       @relation(fields: [patientId], references: [id])
+  medicalRecord MedicalRecord? @relation(fields: [medicalRecordId], references: [id])
+}
+
+model FollowUp {
+  id                  String         @id @default(cuid())
+  patientId           String
+  medicalRecordId     String?
+  doctorId            String
+  plannedDate         DateTime
+  followUpType        FollowUpType   @default(ONLINE)
+  status              FollowUpStatus @default(PENDING)
+  currentSymptoms     String?
+  medicationCompliance String?
+  adverseReactions    String?
+  bloodPressure       String?
+  heartRate           Int?
+  doctorAssessment    String?
+  treatmentAdjustment String?
+  nextFollowUpDate    DateTime?
+  patientScore        Int?
+  patientFeedback     String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  patient      Patient?       @relation(fields: [patientId], references: [id])
+  medicalRecord MedicalRecord? @relation(fields: [medicalRecordId], references: [id])
+  doctor       User           @relation(fields: [doctorId], references: [id])
+}
+
+model EducationArticle {
+  id                  String        @id @default(cuid())
+  title               String
+  content             String
+  category            String
+  tags                String?
+  applicableDiseases  String?
+  status              ArticleStatus @default(DRAFT)
+  isPushable          Boolean       @default(false)
+  targetPatientGroups String?
+  createdById         String
+  reviewComment       String?
+  viewCount           Int           @default(0)
+  publishedAt         DateTime?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  createdBy User @relation("ArticleCreator", fields: [createdById], references: [id])
+}
+
+model PatientGroup {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members PatientGroupMember[]
+}
+
+model PatientGroupMember {
+  id            String   @id @default(cuid())
+  groupId       String
+  patientId     String
+  createdAt     DateTime @default(now())
+
+  group   PatientGroup @relation(fields: [groupId], references: [id])
+  patient Patient      @relation(fields: [patientId], references: [id])
+
+  @@unique([groupId, patientId])
+}
+
+model LeaveRequest {
+  id               String      @id @default(cuid())
+  patientId        String
+  startTime        DateTime
+  endTime          DateTime
+  leaveType        LeaveType
+  reason           String?
+  destination      String?
+  emergencyContact String?
+  status           LeaveStatus @default(PENDING_APPROVAL)
+  approvedById     String?
+  approvalComment  String?
+  approvedAt       DateTime?
+  returnConfirmed  Boolean     @default(false)
+  returnAt         DateTime?
+  signature        String
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  patient   Patient @relation(fields: [patientId], references: [id])
+  approvedBy User?  @relation("ApprovingDoctor", fields: [approvedById], references: [id])
+}
+
+model HealthRecord {
+  id                  String   @id @default(cuid())
+  patientId           String   @unique
+  medicationHistory   String?
+  visitRecords        String?
+  examinationResults  String?
+  diagnosisRecords    String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  patient Patient @relation(fields: [patientId], references: [id])
+}
+
+model Acupoint {
+  id                  String   @id @default(cuid())
+  name                String
+  pinyin              String?
+  englishName         String?
+  code                String?
+  meridian            String?
+  category            String?
+  location            String?
+  simpleLocation      String?
+  anatomy             String?
+  indications         String?
+  modernApplications  String?
+  tcmIndications      String?
+  needlingMethod      String?
+  moxibustionMethod   String?
+  massageMethod       String?
+  compatibleAcupoints String?
+  classicPrescriptions String?
+  precautions         String?
+  contraindications   String?
+  warnings            String?
+  diagramUrl          String?
+  teachingVideoUrl    String?
+  references          String?
+  clinicalCases       String?
+  researchPapers      String?
+  modernResearch       String?
+  effects             String?
+  fiveElement         String?
+  yinYang             String?
+  relatedMeridians    String?
+  relatedOrgans       String?
+  relatedSyndromes    String?
+  viewCount           Int      @default(0)
+  rating              Float?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model AcupunctureTechnique {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  effects         String?
+  operationMethod String?
+  retentionTime   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model TCMTreatment {
+  id                  String                 @id @default(cuid())
+  name                String
+  category            TCMTreatmentCategoryType
+  description         String?
+  indications         String?
+  contraindications   String?
+  suggestedDuration   Int?
+  referencePrice      Float?
+  customTags          String?
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  action        String
+  operatorId    String
+  sessionId     String?
+  ipAddress     String?
+  resourceType  String?
+  resourceId    String?
+  details       String?
+  success       Boolean  @default(true)
+  failureReason String?
+  createdAt     DateTime @default(now())
+
+  operator User @relation(fields: [operatorId], references: [id])
+
+  @@index([operatorId])
+  @@index([action])
+  @@index([resourceType])
+  @@index([createdAt])
+}
+
+model SystemSettings {
+  id                    String   @id @default(cuid())
+  systemName            String   @default("天枢临床决策管理系统")
+  systemDescription     String?
+  enableSelfRegistration Boolean @default(true)
+  enableTwoFactorAuth   Boolean   @default(false)
+  sessionTimeoutMinutes Int      @default(480)
+  maxLoginAttempts      Int      @default(5)
+  enableAuditLog        Boolean   @default(true)
+  auditLogRetentionDays Int      @default(365)
+  enablePiiMask         Boolean   @default(true)
+  defaultLanguage       String   @default("zh-CN")
+  timezone              String   @default("Asia/Shanghai")
+  enableDataBackup      Boolean   @default(false)
+  backupIntervalHours   Int      @default(24)
+  updatedAt             DateTime @updatedAt
+}

@@ -1,0 +1,1 @@
+{"version":3,"file":"risk-level.enum.d.ts","sourceRoot":"","sources":["../../src/enums/risk-level.enum.ts"],"names":[],"mappings":"AAAA,oBAAY,SAAS;IACnB,GAAG,QAAQ;IACX,MAAM,WAAW;IACjB,IAAI,SAAS;IACb,QAAQ,aAAa;CACtB;AAED,eAAO,MAAM,cAAc,EAAE,MAAM,CAAC,SAAS,EAAE,MAAM,CAKpD,CAAC;AAEF,eAAO,MAAM,cAAc,EAAE,MAAM,CAAC,SAAS,EAAE,MAAM,CAKpD,CAAC"}

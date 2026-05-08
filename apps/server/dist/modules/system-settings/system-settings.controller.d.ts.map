@@ -1,0 +1,1 @@
+{"version":3,"file":"system-settings.controller.d.ts","sourceRoot":"","sources":["../../../src/modules/system-settings/system-settings.controller.ts"],"names":[],"mappings":"AAQA,OAAO,EAAE,qBAAqB,EAAE,MAAM,2BAA2B,CAAC;AAGlE,qBAGa,wBAAwB;IACvB,OAAO,CAAC,qBAAqB;gBAArB,qBAAqB,EAAE,qBAAqB;IAI1D,GAAG;IAMH,MAAM,CAAS,GAAG,EAAE,MAAM,CAAC,MAAM,EAAE,GAAG,CAAC;;;;;;;;;;;;;;;;;CAG9C"}

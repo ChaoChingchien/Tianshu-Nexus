@@ -1,0 +1,1 @@
+{"version":3,"file":"system-settings.service.d.ts","sourceRoot":"","sources":["../../../src/modules/system-settings/system-settings.service.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,aAAa,EAAE,MAAM,oCAAoC,CAAC;AAEnE,qBACa,qBAAqB;IACpB,OAAO,CAAC,MAAM;gBAAN,MAAM,EAAE,aAAa;IAEnC,WAAW;IAMX,cAAc,CAAC,GAAG,EAAE,MAAM,CAAC,MAAM,EAAE,GAAG,CAAC;;;;;;;;;;;;;;;;;CAU9C"}

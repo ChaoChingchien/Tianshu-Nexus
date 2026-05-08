@@ -1,0 +1,1 @@
+{"version":3,"file":"appointment-status.enum.d.ts","sourceRoot":"","sources":["../../src/enums/appointment-status.enum.ts"],"names":[],"mappings":"AAAA,oBAAY,iBAAiB;IAC3B,SAAS,cAAc;IACvB,UAAU,eAAe;IACzB,SAAS,cAAc;IACvB,SAAS,cAAc;IACvB,OAAO,YAAY;CACpB;AAED,eAAO,MAAM,sBAAsB,EAAE,MAAM,CAAC,iBAAiB,EAAE,MAAM,CAMpE,CAAC"}
