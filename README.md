@@ -203,9 +203,13 @@ JWT_EXPIRATION=24h
 ENCRYPTION_KEY=<32-byte-hex>
 HMAC_SECRET=<random-secret>
 
-# 服务
+# Redis
+REDIS_URL=redis://localhost:6379
+
+# 端口
 SERVER_PORT=3001
-CORS_ORIGIN=http://localhost:3000
+
+# 前端 API
 NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
 ```
 
@@ -213,8 +217,9 @@ NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
 
 ## 贡献指南
 
-1. 新增模块需同时在 shared/server/web 三层添加代码
-2. 共享类型/枚举放在 `packages/shared/src/`，修改后执行 `pnpm --filter @tianshu/shared run build`
-3. 后端遵循 NestJS 模块化规范：`module → controller → service → dto`
-4. 前端 API 调用统一通过 `src/services/` 下的 service 文件，使用 `api-client.ts` 统一配置的 Axios 实例
-5. 提交前运行 `pnpm lint` 确保类型检查通过
+1. 拉取最新代码 `git pull`
+2. 创建功能分支 `git checkout -b feature/xxx`
+3. 遵循 NestJS 装饰器模式（后端）+ Next.js App Router（前端）
+4. 共享类型放入 `packages/shared/src/types/`
+5. 提交前通过类型检查 `pnpm lint`
+6. 提交 PR 到 `main` 分支
