@@ -193,23 +193,23 @@ ${dto.additionalInfo ? `补充信息：${dto.additionalInfo}` : ''}
     return this.mockOcr(dto);
   }
 
-  // ── Mock fallbacks ──
+  // ── Mock fallbacks（仅用于分析占位，不含真实病历数据）──
   private mockHte(dto: any) {
     return {
       success: true,
       data: {
         predictions: (dto.candidateTreatments || ['方案A', '方案B']).map((name: string, i: number) => ({
           treatmentName: name,
-          successRate: 0.75 - i * 0.1,
-          confidenceInterval: [0.65 - i * 0.1, 0.85 - i * 0.1],
-          expectedDuration: `${4 + i * 2}-${6 + i * 2}周`,
-          expectedCost: 3000 + i * 1000,
-          rationale: '基于患者特征和治疗方案匹配度的初步评估（⚠️ mock数据）',
+          successRate: 'N/A',
+          confidenceInterval: 'N/A',
+          expectedDuration: 'N/A',
+          expectedCost: 'N/A',
+          rationale: '[MOCK] 请在 .env 中配置 DEEPSEEK_API_KEY 以启用真实 AI 疗效预测',
         })),
-        doctorPatientMatchScore: 0.72,
-        summary: '建议结合医生经验和患者偏好综合决策（⚠️ 当前为模拟数据，配置DEEPSEEK_API_KEY以启用AI分析）',
+        doctorPatientMatchScore: null,
+        summary: '[MOCK] AI 分析模块未启用 — 当前返回占位数据。配置 DEEPSEEK_API_KEY 后自动切换为 DeepSeek 模型预测。',
       },
-      metadata: { model: 'mock-v1', timestamp: new Date().toISOString(), _warning: 'mock' },
+      metadata: { model: 'mock-placeholder', timestamp: new Date().toISOString(), _warning: 'mock' },
     };
   }
 
@@ -217,18 +217,13 @@ ${dto.additionalInfo ? `补充信息：${dto.additionalInfo}` : ''}
     return {
       success: true,
       data: {
-        riskLevel: dto.patientId ? 'medium' : 'low',
-        score: 65,
-        factors: [
-          { name: '年龄', weight: 0.2, value: '中等风险', description: '需关注年龄相关风险' },
-          { name: '既往病史', weight: 0.3, value: '低风险', description: '无严重既往病史记录' },
-          { name: '生活习惯', weight: 0.25, value: '中等风险', description: '需进一步评估' },
-          { name: '用药情况', weight: 0.25, value: '待评估', description: '需确认当前用药方案' },
-        ],
-        suggestions: ['建议定期复查', '注意饮食调理', '保持适度运动'],
-        overallAssessment: '整体风险中等，建议结合临床检查进一步确认（⚠️ 当前为模拟数据，配置DEEPSEEK_API_KEY以启用AI分析）',
+        riskLevel: null,
+        score: null,
+        factors: [],
+        suggestions: [],
+        overallAssessment: '[MOCK] AI 风险分析模块未启用。配置 DEEPSEEK_API_KEY 后自动切换为 DeepSeek 多维度风险评估。',
       },
-      metadata: { model: 'mock-v1', timestamp: new Date().toISOString(), _warning: 'mock' },
+      metadata: { model: 'mock-placeholder', timestamp: new Date().toISOString(), _warning: 'mock' },
     };
   }
 
@@ -236,22 +231,14 @@ ${dto.additionalInfo ? `补充信息：${dto.additionalInfo}` : ''}
     return {
       success: true,
       data: {
-        entities: [
-          { text: '头痛', type: 'symptom', confidence: 0.95 },
-          { text: '3天', type: 'duration', confidence: 0.9 },
-          { text: '布洛芬', type: 'medication', confidence: 0.88 },
-        ],
-        summary: dto.text ? `患者主诉：${dto.text.slice(0, 50)}...` : '患者主诉头痛3天，曾服用布洛芬效果不佳。',
-        keywords: ['头痛', '布洛芬', '持续性'],
-        sentiment: 'negative',
-        structuredFields: {
-          主诉: '头痛',
-          病程: '3天',
-          用药史: '布洛芬',
-        },
-        _warning: '⚠️ 当前为模拟数据，配置DEEPSEEK_API_KEY以启用AI分析',
+        entities: [],
+        summary: '[MOCK] NLP 结构化模块未启用。配置 DEEPSEEK_API_KEY 后自动切换为 DeepSeek 语义分析。',
+        keywords: [],
+        sentiment: null,
+        structuredFields: {},
+        _inputPreview: dto.text ? dto.text.slice(0, 80) : null,
       },
-      metadata: { model: 'mock-v1', timestamp: new Date().toISOString(), _warning: 'mock' },
+      metadata: { model: 'mock-placeholder', timestamp: new Date().toISOString(), _warning: 'mock' },
     };
   }
 
@@ -259,19 +246,13 @@ ${dto.additionalInfo ? `补充信息：${dto.additionalInfo}` : ''}
     return {
       success: true,
       data: {
-        text: dto.imageBase64 || dto.imageUrl
-          ? '模拟OCR识别结果：处方单内容...'
-          : '未提供图片',
-        confidence: 0.92,
-        fields: [
-          { name: '患者姓名', value: '张三', confidence: 0.95 },
-          { name: '药品名称', value: '复方丹参滴丸', confidence: 0.95 },
-          { name: '用法用量', value: '口服 10粒/次 3次/日', confidence: 0.9 },
-          { name: '医师签名', value: '张医生', confidence: 0.85 },
-        ],
-        _warning: '⚠️ 当前为模拟数据，配置DEEPSEEK_API_KEY并上传真实处方图片以启用AI识别',
+        text: null,
+        confidence: null,
+        fields: [],
+        _imageProvided: !!(dto.imageBase64 || dto.imageUrl),
+        _hint: '[MOCK] OCR 识别模块未启用。配置 DEEPSEEK_API_KEY 并上传真实处方图片以启用 AI 处方识别。',
       },
-      metadata: { model: 'mock-v1', timestamp: new Date().toISOString(), _warning: 'mock' },
+      metadata: { model: 'mock-placeholder', timestamp: new Date().toISOString(), _warning: 'mock' },
     };
   }
 }
